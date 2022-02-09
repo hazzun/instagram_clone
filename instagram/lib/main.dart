@@ -11,10 +11,17 @@ void main() {
 }
 
   var a = TextStyle(fontSize: 20, );
+  int screenIndex = 0;
 
-class MyApp extends StatelessWidget {
+
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,9 +37,26 @@ class MyApp extends StatelessWidget {
       body: Container(
           child: Icon(Icons.favorite_border)
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Icon(Icons.live_help),
+      bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'home'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined), label: 'shopping'),
+        ],
       ),
+      // BottomAppBar(
+      //   child: Container(
+      //     height: 50,
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+      //       children: [
+      //         IconButton(onPressed: (){}, icon: Icon(Icons.home_outlined)),
+      //         IconButton(onPressed: (){}, icon: Icon(Icons.shopping_bag_outlined)),
+      //       ],
+      //     ),
+      //   ),
+      // ),
     );
   }
 }
