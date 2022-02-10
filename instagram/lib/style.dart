@@ -5,10 +5,10 @@ var theme = ThemeData(
   appBarTheme: AppBarTheme(
       color: Colors.white,
       elevation: 1,
-      iconTheme: IconThemeData(color: Colors.black),
-      titleTextStyle: TextStyle(color: Colors.black)
+      iconTheme: IconThemeData(color: Colors.black, ),
+      titleTextStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.w900)
   ),
-  textTheme: TextTheme(bodyText2: TextStyle(color: Colors.redAccent)),
+  textTheme: TextTheme(bodyText2: TextStyle(height: 1.7)),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     elevation: 1,
     selectedItemColor: Colors.black,
