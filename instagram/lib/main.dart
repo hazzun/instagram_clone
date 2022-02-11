@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'style.dart' as style;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/rendering.dart';  //스크롤 관련 유용한 함수들이 들어있음
 
 void main() {
   runApp(
@@ -39,9 +40,16 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       jsonData = resultDecode;
-      print(jsonData[0]);
+      // print(jsonData[0]);
     });
   }
+
+  addMoreData(a){
+    setState(() {
+      jsonData.add(a);
+    });
+  }
+
 
   @override
   void initState() {  //MyApp위젯이 로드될 때 실행
@@ -62,7 +70,7 @@ class _MyAppState extends State<MyApp> {
         actions: [IconButton(icon: Icon(Icons.add_box_outlined), onPressed: (){},)],
       ),
       body: Container(
-          child: [home(json : jsonData), reels()][tab]
+          child: [home(json : jsonData, addMoreData: addMoreData), reels()][tab]
       ),
       bottomNavigationBar: BottomNavigationBar(
         showSelectedLabels: false,
@@ -81,15 +89,49 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class home extends StatelessWidget {
-  home({Key? key, this.json}) : super(key: key);
+class home extends StatefulWidget {  //scrollbar 위치 측정하려면 ListView 담은곳이 StatefullWidget이어야 함
+  home({Key? key, this.json, this.addMoreData}) : super(key: key);
   var json;
+  var addMoreData;
+
+  @override
+  State<home> createState() => _homeState();
+}
+
+class _homeState extends State<home> {
+
+  var scroll = ScrollController();
+  var jsonDataMore = [];
+
+  @override
+  void initState() {
+    super.initState();
+    scroll.addListener(() {   //왼쪽의변수(scroll)이 변할 때 마다 안의 코드를 실행시켜
+     // print(scroll.position.pixels);
+      if(scroll.position.pixels == scroll.position.maxScrollExtent){
+        getJsonData();
+      } else {}
+    });
+  }
+  getJsonData() async {
+    var jsonData = await http.get(Uri.parse('https://codingapple1.github.io/app/more1.json'));
+    var jsonData2 = await http.get(Uri.parse('https://codingapple1.github.io/app/more2.json'));
+    var jsonDataDecode = jsonDecode(jsonData.body);
+    var jsonDataDecode2 = jsonDecode(jsonData2.body);
+    print(jsonDataDecode);
+    print(jsonDataDecode2);
+    widget.addMoreData(jsonDataDecode);
+    widget.addMoreData(jsonDataDecode2);
+  }
 
   @override
   Widget build(BuildContext context) {
     // var image1 = json[0]['image'];
-    if( json.length != null ) {
-      return ListView.builder(itemCount: json.length, itemBuilder: (context, i){
+    if( widget.json.length != null ) {  //StatefullWidget은 부모가 보낸 state등록은 첫번째 class, 사용은 두번째 class에서 해야 함
+      return ListView.builder(
+          itemCount: widget.json.length ,
+          controller: scroll,
+          itemBuilder: (context, i){
         return  Container(
           width: 600,
           height: 620,
@@ -105,7 +147,7 @@ class home extends StatelessWidget {
                       children: [
                         // Image.network('https://codingapple1.github.io/app/img0.jpg', height: 200,),
                         // Image.asset('young.jpeg', height: 600)
-                        Image.network(json[i]['image'], height: 500,)
+                        Image.network(widget.json[i]['image'], height: 500,)
                       ]
                   )
               ),
@@ -117,9 +159,9 @@ class home extends StatelessWidget {
                 ],
               ),
               // Text('좋아요 100,000,000,000개', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('좋아요 ' + json[i]['likes'].toString() +'개', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('좋아요 ${widget.json[i]['likes']}개', style: TextStyle(fontWeight: FontWeight.bold)),
               // Text('볼링을 치지 널 칠순 없잖아?'),
-              Text(json[i]['content']),
+              Text(widget.json[i]['content']),
               Text('#볼링장에서 #찰칵 #나이쁘지', style: TextStyle(fontSize: 10),),
               // Container(
               //     padding: EdgeInsets.fromLTRB(0, 50, 0, 10),
