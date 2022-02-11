@@ -67,7 +67,15 @@ class _MyAppState extends State<MyApp> {
             Text('Instagram', style: a),
           ],
         ),
-        actions: [IconButton(icon: Icon(Icons.add_box_outlined), onPressed: (){},)],
+        actions: [
+          IconButton(icon: Icon(Icons.add_box_outlined),
+            onPressed: (){
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (c) => Upload())
+            );
+            },)
+        ],
       ),
       body: Container(
           child: [home(json : jsonData, addMoreData: addMoreData), reels()][tab]
@@ -202,5 +210,32 @@ class reels extends StatelessWidget {
         children: [Text('릴스 페이지 만드는중임', style: TextStyle(fontSize: 30),)],
       ),
     );
+  }
+}
+
+class Upload extends StatelessWidget {
+  const Upload({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('이미지업로드화면'),
+            IconButton(
+                onPressed: (){
+                  Navigator.pop(context);
+                  // Navigator.push(context,
+                  //   MaterialPageRoute(builder: (c)=> Text('test'))
+                  // );
+                },
+                icon: Icon(Icons.close)
+            ),
+          ],
+        )
+    );
+
   }
 }
