@@ -3,6 +3,9 @@ import 'style.dart' as style;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/rendering.dart';  //스크롤 관련 유용한 함수들이 들어있음
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 
 void main() {
   runApp(
@@ -27,6 +30,30 @@ class _MyAppState extends State<MyApp> {
 
   var tab = 0;
   var jsonData = [];
+  var userImage;
+  var userContent;
+
+  addMyPhoto(){
+    var addPhoto =
+    {
+      'id': jsonData.length,
+      'image': userImage,
+      'likes': 99,
+      'date': 'Oct 12',
+      'content': userContent,
+      'user': '_hazzun'
+    };
+    setState(() {
+      jsonData.insert(0, addPhoto);
+    });
+}
+
+  editComent(a){
+    setState(() {
+      userContent = a;
+    });
+    print(userContent);
+  }
 
   getData() async {
     var result = await http.get(Uri.parse('https://codingapple1.github.io/app/data.json'));
@@ -69,16 +96,25 @@ class _MyAppState extends State<MyApp> {
         ),
         actions: [
           IconButton(icon: Icon(Icons.add_box_outlined),
-            onPressed: (){
+            onPressed: () async {
+              var picker = ImagePicker();
+              var image = await picker.pickImage(source: ImageSource.gallery);
+              if(image != null){
+                setState(() {
+                  userImage = File(image.path);
+                  print(userImage);
+                  print(Image.file(userImage));
+                });
+              }
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (c) => Upload())
+              MaterialPageRoute(builder: (c) => Upload(userImage : userImage, addMyPhoto: addMyPhoto, userContent: userContent, editComment: editComent))
             );
             },)
         ],
       ),
       body: Container(
-          child: [home(json : jsonData, addMoreData: addMoreData), reels()][tab]
+          child: [home(json : jsonData, addMoreData: addMoreData, userImage: userImage,), reels()][tab]
       ),
       bottomNavigationBar: BottomNavigationBar(
         showSelectedLabels: false,
@@ -98,9 +134,10 @@ class _MyAppState extends State<MyApp> {
 }
 
 class home extends StatefulWidget {  //scrollbar 위치 측정하려면 ListView 담은곳이 StatefullWidget이어야 함
-  home({Key? key, this.json, this.addMoreData}) : super(key: key);
+  home({Key? key, this.json, this.addMoreData, this.userImage}) : super(key: key);
   var json;
   var addMoreData;
+  var userImage;
 
   @override
   State<home> createState() => _homeState();
@@ -110,6 +147,7 @@ class _homeState extends State<home> {
 
   var scroll = ScrollController();
   var jsonDataMore = [];
+
 
   @override
   void initState() {
@@ -142,7 +180,7 @@ class _homeState extends State<home> {
           itemBuilder: (context, i){
         return  Container(
           width: 600,
-          height: 620,
+          height: 500,
           // color: Colors.grey,
           child: Column(
             // mainAxisAlignment: MainAxisAlignment.start,
@@ -155,7 +193,9 @@ class _homeState extends State<home> {
                       children: [
                         // Image.network('https://codingapple1.github.io/app/img0.jpg', height: 200,),
                         // Image.asset('young.jpeg', height: 600)
-                        Image.network(widget.json[i]['image'], height: 500,)
+                        widget.json[i]['image'].runtimeType == String
+                            ? Image.network(widget.json[i]['image'], height: 380,)
+                            : Image.file(widget.json[i]['image'], height: 380,)
                       ]
                   )
               ),
@@ -214,25 +254,62 @@ class reels extends StatelessWidget {
 }
 
 class Upload extends StatelessWidget {
-  const Upload({Key? key}) : super(key: key);
+  Upload({Key? key, this.userImage, this.addMyPhoto, this.userContent, this.editComment}) : super(key: key);
+  var userImage;
+  var addMyPhoto;
+  var userContent;
+  var editComment;
+  // var userInput = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: (){
+              Navigator.pop(context);
+            },
+            icon : Icon(Icons.arrow_back_outlined)
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('새 게시물'),
+            ],
+          ),
+          actions: [IconButton(onPressed: (){
+            addMyPhoto();
+            // editComment(userInput.text);
+            Navigator.pop(context);
+          }, icon: Icon(Icons.check))],
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('이미지업로드화면'),
-            IconButton(
-                onPressed: (){
-                  Navigator.pop(context);
-                  // Navigator.push(context,
-                  //   MaterialPageRoute(builder: (c)=> Text('test'))
-                  // );
-                },
-                icon: Icon(Icons.close)
+            Container(
+              color: Colors.grey,
+              child: Row(
+                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                      margin: EdgeInsets.all(10),
+                      child: Image.file(userImage, height: 150,)
+                  ),
+                  // Text('test'),
+                  Container(
+                    width: 200,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: '문구 입력...',
+                      ),
+                      // controller: userInput,
+                      onChanged: (text){editComment(text);},
+                    ),
+                  )
+                ],
+              ),
             ),
+            Text('이미지업로드화면'),
           ],
         )
     );
